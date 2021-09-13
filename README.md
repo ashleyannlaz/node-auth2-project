@@ -26,8 +26,8 @@ Write the following user access functions inside `api/users/users-model.js`:
 
 Write the following auth middlewares inside `api/auth/auth-middleware.js`:
 
-- [ ] `restricted`
-- [ ] `only`
+- [x] `restricted`
+- [x] `only`
 - [ ] `checkUsernameExists`
 - [ ] `validateRoleName`
 
@@ -45,7 +45,7 @@ The endpoints inside `api/users/users-router.js` are built already but check the
 - [ ] `[GET] /api/users` - only users with a valid token can access
 - [ ] `[GET] /api/users/:user_id` - only users with a valid token AND a role of 'admin' can access
 
-#### 2D - Secrets File
+#### 2D - Secrets File - Done
 
 Complete the `secrets/index.js` file.
 
