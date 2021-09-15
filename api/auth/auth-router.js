@@ -6,18 +6,21 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 function buildToken(user) {
+  
   const payload = {
     subject: user.user_id,
     username: user.username,
-    role: user.role_name,
+    role_name: user.role_name,
   };
+  console.log(payload)
   const options = {
     expiresIn: "1d",
   };
-  return jwt.sign(payload, TOKEN_SECRET, options);
+  const token = jwt.sign(payload, JWT_SECRET, options)
+  return token
 }
 
-router.post("/register", validateRoleName, (req, res, next) => {
+router.post("/register", validateRoleName, async (req, res, next) => {
   /**
     [POST] /api/auth/register { "username": "anna", "password": "1234", "role_name": "angel" }
 
@@ -29,24 +32,51 @@ router.post("/register", validateRoleName, (req, res, next) => {
       "role_name": "angel"
     }
    */
+  
+  const {username, password} = req.body
+  const {role_name} = req
+  const hash = bcrypt.hashSync(password,8)
+  Users.add({username, password: hash, role_name})
+  .then(noidea => {
+    res.status(201).json(noidea)
+  })
+  .catch(next)
+  
+
 });
 
 router.post("/login", checkUsernameExists, (req, res, next) => {
-  let { username, password } = req.body;
-
-  Users.findBy({ username })
-    .then(([user]) => {
-      if (user && bcrypt.compareSync(password, user.password)) {
-        const token = buildToken(user);
-        res.status(200).json({
-          message: `Welcome back ${user.username}!`,
-          token,
-        });
-      } else {
-        next({ status: 401, message: "Invalid" });
-      }
+  // let { username, password } = req.body;
+  if (bcrypt.compareSync(req.body.password, req.user.password)) {
+    const token = buildToken(req.user)
+    res.status(200).json({
+      message: `${req.user.username} is back!`,
+      token,
     })
-    .catch(next);
+
+  } else {
+    next({status:401, message: 'Invalid credentials'})
+  }
+
+
+  // Users.findBy({ username })
+  //   .then(([user]) => {
+  //     if (user && bcrypt.compareSync(password, user.password)) {
+  //       const token = buildToken(user);
+  //       res.status(200).json({
+  //         message: `${user.username} is back!`,
+  //         token,
+          
+  //         subject: user.role_id,
+  //         username: user.username,
+  //         role_name: user.role_name
+          
+  //       });
+  //     } else {
+  //       next({ status: 401, message: "Invalid credentials" });
+  //     }
+  //   })
+  //   .catch(next);
 
   /**
     [POST] /api/auth/login { "username": "sue", "password": "1234" }
